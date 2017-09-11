@@ -1,0 +1,31 @@
+Terms In STL Collections -
+(1) Can't have a "map" (or any other collection?) of references.
+(2) I don't think they can be 'const' either.
+(3) The MUST be 'assignable' (IE have 'operator='); usually the default is good enough
+(or you won't realistically need to use the '=') - BUT: any members of the term are REFERENCES(&)
+- a default 'operator=' WON'T be generated, and you must write one yourself.
+
+In QT -
+(1) QLabel widgets - and presumably all QT widgets - CANNOT be shared/used-several-times inside a single QT GUI window:
+you must create separate widgets.
+(2) Create all your QT widgets IN ADVANCE - IE not on the fly, not even in your SIGNAL-SLOT functions.
+QT throws an assertion: it sees you are trying to "cheat", and doesn't let you.
+(3) QT signals/slots has an annoying trait: if you make a mistake in the "connect()" call to match signal-&-slot 0
+IE make a mistake in the prototype - the slot simply doesn't get called: the compiler won't catch this:
+you are left to guess the problem, and put debug-break-points on the slots you suspect are not called, in order to diagnose the problem.
+(4) Updating the GUI in MULTIPLE-THREADS does not work!
+If you want to update the GUI - I created a dedicated slot in my main object/widget in the GUI thread,
+and connected it to signals issued by the secondary "non-GUI" threads
+(mercifully, it appears I don't need to guard the dedicated-slot with a mutex-or-such:
+the GUI-thread doesn't seem to mind having several sub-widgets getting updated simultaneously by multiple secondary threads).
+(5) This is a mystery that caused me much grief:
+I connected signal/slot pair with the following prototype:
+signalFunc(size_t, size_t, size_t)
+slotFunc(size_t, size_t, size_t)
+The "slotFunc()" never-ever got called!
+When I replaced the pair with "int" instead of "size_t" in the prototype - the problem was magically resolved! - 
+signalFunc(int, int, int)
+slotFunc(int, int, int)
+Why is this? Maybe QT only likes built-in types, or stuff that isn't typedef'd or macro'd (size_t is a "macro" or a "typedef" - I'm not sure which).
+It seems to be defined in stddef.h as:
+typedef unsigned long size_t;

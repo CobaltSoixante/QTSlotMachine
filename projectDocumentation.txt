@@ -1,0 +1,3 @@
+EgmGui - the main GUI of the application; may contain several instances of EgmReel.
+EgmReel - an active Reel/thread that spins a single reel in the EGM. One for every reel in the EGM. Several instances may shar a single/common EgmReelCombination object.
+EgmReelCombination - represents a combination in a single reel. several reels (even all) can share a common instance.
